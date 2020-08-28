@@ -53,10 +53,10 @@ File = ''
 
 # Pre-define Devices
 [[DeviceList]]
-  Name = 'Time-Sensor-01'
-  Profile = 'Time-Sensor'
-  Description = 'device reporting time in seconds'
-  Labels = [ 'time-sensor' ]
+  Name = 'IOTECH0A0B0C'
+  Profile = 'RFRainSensor'
+  Description = 'RFRain RFID sensor reader'
+  Labels = [ 'RFID-sensor' ]
   [DeviceList.Protocols]
     [DeviceList.Protocols.other]
     Address = 'simple01'
@@ -64,12 +64,13 @@ File = ''
   [[DeviceList.AutoEvents]]
     Frequency = '10s'
     OnChange = false
-    Resource = 'Time_Seconds'
+    Resource = 'Latest_Tags'
 
 [Driver]
 User="customer@iotechsys.com"
 Password="customer@iotechsys.com!"
 Company="iotechsys"
 SessionKeyURL="https://cd2.rfrain.com/ZoneManager/rfrainapi.php/get_sessionkey"
-StartMonitoringJitterURL="https://cd2.rfrain.com/ZoneManager/rfrainapi.php/start_monitoring_new_tags_jitter"
-GetTagsJitterURL="https://cd2.rfrain.com/ZoneManager/rfrainapi.php/get_latest_tags_jitter"
+StartMonitoringURL="https://cd2.rfrain.com/ZoneManager/rfrainapi.php/start_monitoring_new_tags_history"
+GetTagsURL="https://cd2.rfrain.com/ZoneManager/rfrainapi.php/get_latest_tags_history"
+InvalidateURL="https://cd2.rfrain.com/rfrainapi.php/destroy_sessionkey"

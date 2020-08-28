@@ -9,8 +9,7 @@ package driver
 
 import (
 	"fmt"
-        "time"
-
+	"errors"
 	dsModels "github.com/edgexfoundry/device-sdk-go/pkg/models"
 	"github.com/edgexfoundry/go-mod-core-contracts/clients/logger"
 	contract "github.com/edgexfoundry/go-mod-core-contracts/models"
@@ -39,17 +38,23 @@ func (s *SimpleDriver) Initialize(lc logger.LoggingClient, asyncCh chan<- *dsMod
 
 // HandleReadCommands triggers a protocol Read operation for the specified device.
 func (s *SimpleDriver) HandleReadCommands(deviceName string, protocols map[string]contract.ProtocolProperties, reqs []dsModels.CommandRequest) (res []*dsModels.CommandValue, err error) {
-	s.lc.Debug(fmt.Sprintf("SimpleDriver.HandleReadCommands: protocols: %v resource: %v attributes: %v", protocols, reqs[0].DeviceResourceName, reqs[0].Attributes))
-        res = make([]*dsModels.CommandValue,1)
-        t:= time.Now()
-        secs:= int8(t.Second())
-        now:= t.UnixNano()
-		cv, _ := dsModels.NewInt8Value(reqs[0].DeviceResourceName, now, secs)
-		fmt.Println("cv would be %s\n", cv)
-
-		s.rfRain.GetLatestTags()
-        res[0] = cv
-
+	latestTags:= s.rfRain.GetLatestTags(deviceName)
+	//fmt.Printf("latestTags is empty %v\n", latestTags == nil)
+	if len(latestTags)<= 0 {
+		s.lc.Info("No results to process")
+		return nil, errors.New("no tags to process")
+		} else {
+			s.lc.Info(fmt.Sprintf("tags to be translated to readings: %v", len(latestTags)))
+			// can't cycle through tags to create event per, so just get top one for now
+			// res = make([]*dsModels.CommandValue,len(latestTags)*len(reqs))
+			// for i, tag := range latestTags {
+				res = make([]*dsModels.CommandValue,len(reqs))
+				for i, devRes := range reqs {
+					cv:= dsModels.NewStringValue(devRes.DeviceResourceName, 0, s.rfRain.GetResource(devRes.DeviceResourceName,latestTags[0]) )
+					res[i] = cv
+				}
+			// }
+		}
 	return
 }
 
@@ -72,7 +77,7 @@ func (s *SimpleDriver) Stop(force bool) error {
 	if s.lc != nil {
 		s.lc.Debug(fmt.Sprintf("SimpleDriver.Stop called: force=%v", force))
 	}
-	return nil
+	return s.rfRain.InvalidateSessionKey()
 }
 
 // AddDevice is a callback function that is invoked

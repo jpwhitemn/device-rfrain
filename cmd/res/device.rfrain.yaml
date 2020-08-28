@@ -1,0 +1,91 @@
+name: "RFRainSensor"
+manufacturer: "RFRain"
+model: "cl_v7.00.13.06"
+labels:
+- "rfid"
+description: "RFRain device service"
+
+deviceResources:
+-
+  name: "tagnumb"
+  description: "rfid tag number"
+  properties:
+    value:
+      { type: "String", readWrite: "R"}
+    units:
+      { type: "String", readWrite: "R", defaultValue: "id" }
+# -
+#   name: "tagname"
+#   description: "rfid tag name"
+#   properties:
+#     value:
+#       { type: "String", readWrite: "R"}
+#     units:
+#       { type: "String", readWrite: "R", defaultValue: "name" }
+# -  
+#   name: "detectstat"
+#   description: "tag status"
+#   properties:
+#     value:
+#       { type: "String", readWrite: "R"}
+#     units:
+#       { type: "String", readWrite: "R", defaultValue: "status" }
+-
+  name: "subzone"
+  description: "sub zone"
+  properties:
+    value:
+      { type: "String", readWrite: "R"}
+    units:
+      { type: "String", readWrite: "R", defaultValue: "zone" }
+-
+  name: "SS"
+  description: "signal strength"
+  properties:
+    value:
+      { type: "String", readWrite: "R", minimum: "0", maximum: "100", defaultValue: "0" }
+    units:
+      { type: "String", readWrite: "R", defaultValue: "% strength" }
+-
+  name: "access"
+  description: "UTC time when tag was read"
+  properties:
+    value:
+      { type: "String", readWrite: "R" }
+    units:
+      { type: "String", readWrite: "R", defaultValue: "UTC" }
+-
+  name: "data"
+  description: "tag data"
+  properties:
+    value:
+      { type: "String", readWrite: "R" }
+    units:
+      { type: "String", readWrite: "R", defaultValue: "data" }
+
+deviceCommands:
+-
+  name: "Latest_Tags"
+  get:
+  - { operation: "get", deviceResource: "tagnumb" }
+  # - { operation: "get", deviceResource: "tagname" }
+  # - { operation: "get", deviceResource: "detectstat" }
+  - { operation: "get", deviceResource: "subzone" }
+  - { operation: "get", deviceResource: "SS" }
+  - { operation: "get", deviceResource: "access" }
+  - { operation: "get", deviceResource: "data" }
+
+coreCommands:
+-
+  name: "Latest"
+  get:
+    path: "/api/v1/device/{deviceId}/Latest"
+    responses:
+    -
+      code: "200"
+      description: ""
+      expectedValues: ["Latest_Tags"]
+    -
+      code: "500"
+      description: "internal server error"
+      expectedValues: []
